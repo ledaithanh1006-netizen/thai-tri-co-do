@@ -9,7 +9,7 @@ function loadQueue(){try{return JSON.parse(localStorage.getItem('offlineQueue')|
 function saveQueue(){try{localStorage.setItem('offlineQueue',JSON.stringify(state.offlineQueue))}catch{}}
 function cacheSnapshot(){try{localStorage.setItem('cachedSnapshot',JSON.stringify({week:state.week,rows:state.rows,classes:state.classes,students:state.students,rules:state.rules,locks:state.locks,pendingCount:state.pendingCount,profile:state.profile}))}catch{}}
 function loadSnapshot(){try{return JSON.parse(localStorage.getItem('cachedSnapshot')||'null')}catch{return null}}
-function weekStart(d){const x=new Date(d);const day=x.getDay();x.setDate(x.getDate()+(day===0?-6:1-day));x.setHours(0,0,0,0);return x.toISOString().slice(0,10)}
+function weekStart(d){const x=new Date(d);const day=x.getDay();x.setDate(x.getDate()+(day===0?-6:1-day));const y=x.getFullYear(),m=String(x.getMonth()+1).padStart(2,'0'),dd=String(x.getDate()).padStart(2,'0');return `${y}-${m}-${dd}`}
 function weekEnd(){return new Date(new Date(state.week+'T00:00:00').getTime()+7*864e5).toISOString()}
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function role(){return state.profile?.role||'guest'}
