@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Điều em muốn nói - Trường TH&THCS Thái Trị</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;margin:0;padding:16px;display:flex;justify-content:center}
+.box{background:#fff;max-width:480px;width:100%;padding:24px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+h1{font-size:20px;color:#14532d;margin-top:0}
+p.sub{color:#555;font-size:14px}
+label{display:block;margin-top:14px;font-weight:600;font-size:14px}
+select,input,textarea{width:100%;box-sizing:border-box;padding:10px;margin-top:6px;border:1px solid #d1d5db;border-radius:6px;font-size:14px}
+textarea{min-height:120px;resize:vertical}
+.row{display:flex;align-items:center;gap:8px;margin-top:14px}
+.row input{width:auto}
+.row label{margin:0}
+button{margin-top:20px;width:100%;padding:12px;background:#14532d;color:#fff;border:none;border-radius:6px;font-size:16px;cursor:pointer}
+button:disabled{opacity:.6}
+.msg{margin-top:14px;padding:10px;border-radius:6px;font-size:14px}
+.ok{background:#dcfce7;color:#14532d}
+.err{background:#fee2e2;color:#991b1b}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>📮 Hòm thư "Điều em muốn nói"</h1>
+<p class="sub">Em có thể chia sẻ góp ý, tâm sự, hoặc điều em lo lắng. Thầy cô sẽ đọc và xử lý. Em có thể gửi ẩn danh nếu muốn.</p>
+<label>Loại nội dung</label>
+<select id="category">
+<option value="hoc_tap">Học tập</option>
+<option value="bat_nat">Bắt nạt / bạo lực</option>
+<option value="tam_ly">Tâm lý, cảm xúc</option>
+<option value="gop_y">Góp ý cho nhà trường</option>
+<option value="khac">Khác</option>
+</select>
+<label>Nội dung em muốn nói</label>
+<textarea id="content" placeholder="Em viết điều em muốn chia sẻ ở đây..."></textarea>
+<div class="row">
+<input type="checkbox" id="anon" checked>
+<label>Gửi ẩn danh (không cần ghi tên)</label>
+</div>
+<div id="nameFields" style="display:none">
+<label>Họ tên (không bắt buộc)</label>
+<input id="studentName" placeholder="Họ và tên của em">
+<label>Lớp (không bắt buộc)</label>
+<input id="className" placeholder="Ví dụ: 7/1">
+</div>
+<button id="sendBtn">Gửi</button>
+<div id="result"></div>
+</div>
+<script>
+const SUPABASE_URL = 'https://zzxkqtkiedeqetofwvjm.supabase.co';
+const SUPABASE_ANON_KEY = 'DAN_PUBLISHABLE_KEY_VAO_DAY';
+const anonBox = document.getElementById('anon');
+const nameFields = document.getElementById('nameFields');
+anonBox.addEventListener('change', () => { nameFields.style.display = anonBox.checked ? 'none' : 'block'; });
+document.getElementById('sendBtn').addEventListener('click', async () => {
+  const content = document.getElementById('content').value.trim();
+  const result = document.getElementById('result');
+  result.textContent = '';
+  result.className = 'msg';
+  if (!content) { result.textContent = 'Em chưa viết nội dung.'; result.classList.add('err'); return; }
+  const isAnon = anonBox.checked;
+  const body = {
+    category: document.getElementById('category').value,
+    content: content,
+    is_anonymous: isAnon,
+    student_name: isAnon ? null : (document.getElementById('studentName').value.trim() || null),
+    class_name: isAnon ? null : (document.getElementById('className').value.trim() || null)
+  };
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true; btn.textContent = 'Đang gửi...';
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      result.textContent = 'Đã gửi thành công. Cảm ơn em đã chia sẻ!';
+      result.classList.add('ok');
+      document.getElementById('content').value = '';
+      document.getElementById('studentName').value = '';
+      document.getElementById('className').value = '';
+    } else {
+      result.textContent = 'Có lỗi, em thử lại sau.';
+      result.classList.add('err');
+    }
+  } catch (err) {
+    result.textContent = 'Không có mạng, em thử lại sau.';
+    result.classList.add('err');
+  }
+  btn.disabled = false; btn.textContent = 'Gửi';
+});
+</script>
+</body>
+</html>
